@@ -103,7 +103,14 @@ const SourceCard = ({ source, sourceData }) => {
 };
 
 const NewsGrid = () => {
-  const [feeds, setFeeds] = useState({});
+   const [feeds, setFeeds] = useState({
+    'Smart Company': { articles: [], sourceColor: 'bg-blue-100 text-blue-800' },
+    'Inside Small Business': { articles: [], sourceColor: 'bg-green-100 text-green-800' },
+    'Startup Daily': { articles: [], sourceColor: 'bg-purple-100 text-purple-800' },
+    'Flying Solo': { articles: [], sourceColor: 'bg-red-100 text-red-800' },
+    "Kochie's Business Builders": { articles: [], sourceColor: 'bg-orange-100 text-orange-800' },
+    'My Business': { articles: [], sourceColor: 'bg-teal-100 text-teal-800' }
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
