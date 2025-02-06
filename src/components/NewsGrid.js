@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const NEWS_SOURCES = {
