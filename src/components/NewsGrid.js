@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "../components/ui/card";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// NEWS_SOURCES data stays the same...
-
 const SourceCard = ({ source, sourceData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const articles = sourceData.articles;
+  const articles = sourceData?.articles || [];
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => 
@@ -19,6 +17,16 @@ const SourceCard = ({ source, sourceData }) => {
       prevIndex === 0 ? articles.length - 1 : prevIndex - 1
     );
   };
+
+  if (!articles.length) {
+    return (
+      <Card className="bg-white hover:shadow-lg transition-shadow duration-200">
+        <CardContent className="p-6">
+          <div className="text-center text-gray-500">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const currentArticle = articles[currentIndex];
 
@@ -95,15 +103,60 @@ const SourceCard = ({ source, sourceData }) => {
 };
 
 const NewsGrid = () => {
+  const [feeds, setFeeds] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const fetchFeeds = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/feeds');
+      if (!response.ok) throw new Error('Failed to fetch feeds');
+      
+      const data = await response.json();
+      setFeeds(data);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching feeds:', err);
+      setError('Failed to load feeds. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeeds();
+    // Refresh feeds every 15 minutes
+    const interval = setInterval(fetchFeeds, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="w-full max-w-7xl mx-auto p-4">
+        <div className="text-red-600 text-center">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full max-w-7xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">
-          Today in business news
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Today in business news
+          </h1>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
 
         <div className="grid grid-cols-3 auto-rows-fr gap-6">
-          {Object.entries(NEWS_SOURCES).map(([source, data]) => (
+          {Object.entries(feeds).map(([source, data]) => (
             <SourceCard key={source} source={source} sourceData={data} />
           ))}
         </div>
